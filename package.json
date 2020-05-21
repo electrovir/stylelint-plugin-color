@@ -1,0 +1,22 @@
+{
+    "name": "stylelint-plugin-color-type",
+    "version": "0.0.0",
+    "description": "restrict color types in CSS",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/electrovir/stylelint-plugin-color-type.git"
+    },
+    "keywords": [
+        "color"
+    ],
+    "author": "electrovir",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/electrovir/stylelint-plugin-color-type/issues"
+    },
+    "homepage": "https://github.com/electrovir/stylelint-plugin-color-type#readme"
+}
