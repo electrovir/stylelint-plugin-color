@@ -1,0 +1,9 @@
+.github
+.vscode
+dist/**/*.test.js
+dist/**/*.test.d.ts
+src
+.prettierrc.json
+jest.config.json
+prettierignore
+tsconfig.json
