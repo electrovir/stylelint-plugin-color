@@ -5,7 +5,8 @@
     "main": "dist/index.js",
     "scripts": {
         "prepublishOnly": "npm run test",
-        "test": "rm -rf dist; tsc && jest"
+        "test": "rm -rf dist; tsc && jest",
+        "debug": "rm -rf dist; tsc; node --inspect-brk node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
     },
     "repository": {
         "type": "git",
@@ -33,6 +34,7 @@
         "stylelint": "^13.0.0"
     },
     "devDependencies": {
+        "@types/css-tree": "^1.0.3",
         "@types/jest": "^26.0.0",
         "@types/stylelint": "^9.10.1",
         "jest": "^26.0.1",
@@ -42,6 +44,11 @@
         "typescript": "^3.9.5"
     },
     "dependencies": {
+        "@types/style-search": "^0.1.1",
+        "css-color-names": "^1.0.1",
+        "css-tree": "^1.0.0-alpha.39",
+        "postcss-value-parser": "^4.1.0",
+        "style-search": "^0.1.0",
         "stylelint-rule-creator": "^4.0.7"
     }
 }

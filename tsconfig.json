@@ -5,9 +5,9 @@
         "forceConsistentCasingInFileNames": true,
         "module": "commonjs",
         "noImplicitAny": true,
-        "noImplicitReturns": true,
         "noImplicitThis": true,
         "outDir": "dist",
+        "resolveJsonModule": true,
         "rootDir": "src",
         "strict": true,
         "target": "ES2018"

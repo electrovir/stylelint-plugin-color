@@ -1,6 +1,6 @@
 # `color-types`
 
-_autofixable_: maybe
+_autofixable_: no
 
 TODO
 
