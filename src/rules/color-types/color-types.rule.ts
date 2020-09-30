@@ -4,17 +4,32 @@ import {
     DefaultOptionMode,
     DefaultRuleOptions,
     doesMatchLineExceptions,
+    ExceptionRegExps,
+    ReportCallback,
 } from 'stylelint-rule-creator';
 import * as parseValue from 'postcss-value-parser';
 import * as styleSearch from 'style-search';
 import {Node} from 'postcss-value-parser';
-import {Declaration} from 'postcss';
-import {parse, lexer, Declaration as DeclarationNode, Matched} from '../../css-tree';
-import * as colorNames from 'css-color-names';
+import {AtRule, Declaration} from 'postcss';
+import * as colorObject from 'css-color-names';
+
+const colorNames = Object.keys(colorObject);
+
+function colorTypeArrayToString(colorTypes: ColorType[]): string {
+    return `[${colorTypes.join(', ')}]`;
+}
 
 const messages = {
-    invalidColorDefinition(colorDefinition: string) {
-        return `Blocked color definition: ${colorDefinition}`;
+    noColorTypesRequiredButColorTypesWereUsed(colorTypes: ColorType[]) {
+        return `Color types not allowed because no required types were given: ${colorTypeArrayToString(
+            colorTypes,
+        )}`;
+    },
+    includesNonRequiredColorTypes(colorTypes: ColorType[]) {
+        return `Color types not in required list: ${colorTypeArrayToString(colorTypes)}`;
+    },
+    includesBlockedColorTypes(colorTypes: ColorType[]) {
+        return `Color types in blocked list: ${colorTypeArrayToString(colorTypes)}`;
     },
 };
 
@@ -42,85 +57,162 @@ const colorFunctions: ColorType[] = [
 
 export type ColorTypesRuleOptions = DefaultRuleOptions & {
     types: ColorType[];
-    allowHelperFunctions: boolean;
+    blockHelperFunctions?: boolean;
 };
 
 const defaultOptions: ColorTypesRuleOptions = {
     mode: DefaultOptionMode.BLOCK,
-    types: [],
-    allowHelperFunctions: true,
+    types: [
+        ColorType.hex,
+        ColorType.named,
+        ColorType.rgb,
+        ColorType.rgba,
+        ColorType.hsl,
+        ColorType.hsla,
+        ColorType.hsv,
+        ColorType.hsva,
+        ColorType.argb,
+    ],
+    blockHelperFunctions: false,
 };
 
 function getColorFunctionName(node: Node): ColorType | undefined {
     return colorFunctions[colorFunctions.indexOf(node.value as ColorType)];
 }
 
-export function getColorTypes(declaration: Declaration): ColorType[] {
-    const declarationString = declaration.toString();
-    const colorTypes: ColorType[] = [];
+export function getColorTypes(node: Declaration | AtRule): Set<ColorType> {
+    const nodeString = node.toString();
+    const nodeValue = (node as Declaration).value || (node as AtRule).params;
+    const colorTypes = new Set<ColorType>();
 
-    parseValue(declaration.value).walk(node => {
-        // functions
+    parseValue(nodeValue).walk(node => {
+        // check for color functions
         if (node.type === 'function') {
             const colorFunctionName = getColorFunctionName(node);
             if (colorFunctionName) {
-                colorTypes.push(colorFunctionName);
+                colorTypes.add(colorFunctionName);
             }
         }
 
-        // keywords
+        // check for color keywords
         if (node.type === 'word') {
-            if (Object.keys(colorNames).includes(node.value)) {
-                colorTypes.push(ColorType.named);
+            if (colorNames.includes(node.value)) {
+                colorTypes.add(ColorType.named);
             }
         }
     });
 
-    // this is how the stylelint rule color-no-hex reads hex values
-    styleSearch({source: declarationString, target: '#'}, match => {
-        if (!/[:,\s]/.test(declarationString[match.startIndex - 1])) {
+    let hexFound = false;
+
+    // check for color hex values
+    styleSearch({source: nodeString, target: '#'}, match => {
+        // this is how the stylelint rule color-no-hex reads hex values
+        if (!/[:,\s]/.test(nodeString[match.startIndex - 1]) || hexFound) {
             return;
         }
 
-        const hexMatch = /^#[0-9A-Za-z]+/.exec(declarationString.substr(match.startIndex));
+        const hexMatch = /^#[0-9A-Za-z]+/.exec(nodeString.substr(match.startIndex));
 
         if (hexMatch) {
-            colorTypes.push(ColorType.hex);
+            colorTypes.add(ColorType.hex);
+            hexFound = true;
+            return;
         }
     });
 
     return colorTypes;
 }
 
-// mode require: definition must be one of the given types
-// mode block: definition cannot be any of the given types
+// mode require: all color definitions must be in the given types list
+// mode block: no color definitions can be in the given types list
+
+function checkNode({
+    node,
+    exceptionRegExps,
+    baseReport,
+    ruleMessages,
+    ruleOptions,
+}: {
+    node: Declaration | AtRule;
+    exceptionRegExps: ExceptionRegExps;
+    baseReport: ReportCallback;
+    ruleMessages: typeof messages;
+    ruleOptions: Partial<ColorTypesRuleOptions> & DefaultRuleOptions;
+}) {
+    if (doesMatchLineExceptions(node, exceptionRegExps)) {
+        return;
+    }
+    const colorTypes = Array.from(getColorTypes(node));
+    if (!colorTypes.length) {
+        // nothing to check if there are no color types in the current declaration
+        return;
+    }
+
+    const report = (message: string) =>
+        baseReport({
+            message,
+            node: node,
+            word: node.toString(),
+        });
+
+    if (ruleOptions.mode === DefaultOptionMode.REQUIRE) {
+        const requiredTypes = ruleOptions.types;
+        if (!requiredTypes?.length) {
+            // short circuit if no required types were given but a color was defined
+            report(ruleMessages.noColorTypesRequiredButColorTypesWereUsed(colorTypes));
+            return;
+        }
+
+        const illegalColorTypes = colorTypes.filter(colorType => {
+            return !requiredTypes.includes(colorType);
+        });
+
+        if (illegalColorTypes.length) {
+            report(ruleMessages.includesNonRequiredColorTypes(illegalColorTypes));
+            return;
+        }
+    } else if (ruleOptions.mode === DefaultOptionMode.BLOCK) {
+        const blockedTypes = ruleOptions.types;
+        if (!blockedTypes?.length) {
+            // no need to check if nothing is blocked
+            return;
+        }
+
+        const illegalColorTypes = colorTypes.filter(colorType => {
+            return blockedTypes.includes(colorType);
+        });
+        if (illegalColorTypes.length) {
+            report(ruleMessages.includesBlockedColorTypes(illegalColorTypes));
+            return;
+        }
+    }
+}
 
 export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleOptions>({
     ruleName: `${prefix}/color-types`,
     messages,
     defaultOptions,
-    ruleCallback: (report, messages, {ruleOptions, root, context, exceptionRegExps}) => {
-        root.walkDecls(declaration => {
-            if (doesMatchLineExceptions(declaration, exceptionRegExps)) {
-                return;
-            }
-            const colorTypes = getColorTypes(declaration);
-
-            if (ruleOptions.mode === DefaultOptionMode.REQUIRE) {
-                // TODO: report on require
-                // report({
-                //     message: messages.invalidColorDefinition(atRule.toString()),
-                //     node: atRule,
-                //     word: atRule.toString(),
-                // });
-            } else if (ruleOptions.mode === DefaultOptionMode.BLOCK) {
-                // TODO: report on block
-                // report({
-                //     message: messages.invalidColorDefinition(atRule.toString()),
-                //     node: atRule,
-                //     word: atRule.toString(),
-                // });
+    ruleCallback: (baseReport, messages, {ruleOptions, root, exceptionRegExps}) => {
+        // this catches less variable assignments
+        root.walkAtRules(atRule => {
+            if (atRule.name.endsWith(':')) {
+                checkNode({
+                    node: atRule,
+                    exceptionRegExps,
+                    baseReport,
+                    ruleMessages: messages,
+                    ruleOptions,
+                });
             }
         });
+        root.walkDecls(declaration =>
+            checkNode({
+                node: declaration,
+                exceptionRegExps,
+                baseReport,
+                ruleMessages: messages,
+                ruleOptions,
+            }),
+        );
     },
 });

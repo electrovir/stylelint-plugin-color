@@ -1,11 +1,22 @@
-import {testDefaultRule} from 'stylelint-rule-creator';
+import {DefaultOptionMode, testDefaultRule} from 'stylelint-rule-creator';
 import {pluginPath} from '../../plugin-util';
-import {colorTypesRule} from './color-types.rule';
+import {ColorType, colorTypesRule} from './color-types.rule';
 
 testDefaultRule({
     rule: colorTypesRule,
     pluginPath: pluginPath,
     tests: [
+        {
+            ruleOptions: {mode: DefaultOptionMode.REQUIRE, types: []},
+            description: 'TODO: add more tests',
+            accept: [
+                {
+                    code: '',
+                    description: 'TODO',
+                },
+            ],
+            reject: [],
+        },
         {
             ruleOptions: true,
             description: 'defaults work as expected',
@@ -42,139 +53,139 @@ testDefaultRule({
                 {
                     description: 'block hex colors',
                     code: 'div { color: #000000; }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hex]),
                 },
                 {
                     description: 'block keyword colors',
                     code: 'div { color: blue; }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.named]),
                 },
                 {
                     description: 'block rgb colors',
                     code: 'div { color: rgb(0, 0, 0); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgb]),
                 },
                 {
                     description: 'block rgba colors',
                     code: 'div { color: rgba(0, 0, 0, 0); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgba]),
                 },
                 {
                     description: 'block hsl colors',
                     code: 'div { color: hsl(0, 0%, 0%); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsl]),
                 },
                 {
                     description: 'block hsla colors',
                     code: 'div { color: hsla(0, 0%, 0%, 0); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsla]),
                 },
                 {
                     description: 'block hsv colors',
                     code: 'div { color: hsv(0, 0%, 0%); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsv]),
                 },
                 {
                     description: 'block hsva colors',
                     code: 'div { color: hsva(0, 0%, 0%, 0); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsva]),
                 },
                 {
                     description: 'block argb colors',
                     code: 'div { color: argb(#000000); }',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.argb]),
                 },
                 // less variables
                 {
                     description: 'block assigning hex colors to less variables',
                     code: '@myVar: #000000;',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hex]),
                 },
                 {
                     description: 'block assigning keyword colors to less variables',
                     code: '@myVar: blue;',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.named]),
                 },
                 {
                     description: 'block assigning rgb colors to less variables',
                     code: '@myVar: rgb(0, 0, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgb]),
                 },
                 {
                     description: 'block assigning rgba colors to less variables',
                     code: '@myVar: rgba(0, 0, 0, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgba]),
                 },
                 {
                     description: 'block assigning hsl colors to less variables',
                     code: '@myVar: hsl(0, 0%, 0%);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsl]),
                 },
                 {
                     description: 'block assigning hsla colors to less variables',
                     code: '@myVar: hsla(0, 0%, 0%, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsla]),
                 },
                 {
                     description: 'block assigning hsv colors to less variables',
                     code: '@myVar: hsv(0, 0%, 0%);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsv]),
                 },
                 {
                     description: 'block assigning hsva colors to less variables',
                     code: '@myVar: hsva(0, 0%, 0%, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsva]),
                 },
                 {
                     description: 'block assigning argb colors to less variables',
                     code: '@myVar: argb(#000000);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.argb]),
                 },
                 // scss variables
                 {
                     description: 'block assigning hex colors to scss variables',
                     code: '$myVar: #000000;',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hex]),
                 },
                 {
                     description: 'block assigning keyword colors to scss variables',
                     code: '$myVar: blue;',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.named]),
                 },
                 {
                     description: 'block assigning rgb colors to scss variables',
                     code: '$myVar: rgb(0, 0, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgb]),
                 },
                 {
                     description: 'block assigning rgba colors to scss variables',
                     code: '$myVar: rgba(0, 0, 0, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.rgba]),
                 },
                 {
                     description: 'block assigning hsl colors to scss variables',
                     code: '$myVar: hsl(0, 0%, 0%);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsl]),
                 },
                 {
                     description: 'block assigning hsla colors to scss variables',
                     code: '$myVar: hsla(0, 0%, 0%, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsla]),
                 },
                 {
                     description: 'block assigning hsv colors to scss variables',
                     code: '$myVar: hsv(0, 0%, 0%);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsv]),
                 },
                 {
                     description: 'block assigning hsva colors to scss variables',
                     code: '$myVar: hsva(0, 0%, 0%, 0);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.hsva]),
                 },
                 {
                     description: 'block assigning argb colors to scss variables',
                     code: '$myVar: argb(#000000);',
-                    message: colorTypesRule.messages.invalidColorDefinition(''),
+                    message: colorTypesRule.messages.includesBlockedColorTypes([ColorType.argb]),
                 },
             ],
         },

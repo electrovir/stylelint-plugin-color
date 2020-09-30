@@ -1,6 +1,6 @@
 {
     "name": "stylelint-plugin-color",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Stylelint plugin for managing colors. Includes Less support.",
     "main": "dist/index.js",
     "scripts": {
@@ -49,6 +49,6 @@
         "css-tree": "^1.0.0-alpha.39",
         "postcss-value-parser": "^4.1.0",
         "style-search": "^0.1.0",
-        "stylelint-rule-creator": "^4.0.7"
+        "stylelint-rule-creator": "^4.0.8"
     }
 }
