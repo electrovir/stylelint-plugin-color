@@ -25,11 +25,10 @@ const messages = {
             colorTypes,
         )}`;
     },
-    includesNonRequiredColorTypes(colorTypes: ColorType[]) {
-        return `Color types not in required list: ${colorTypeArrayToString(colorTypes)}`;
-    },
-    includesBlockedColorTypes(colorTypes: ColorType[]) {
-        return `Color types in blocked list: ${colorTypeArrayToString(colorTypes)}`;
+    includesBlockedColorTypes(line: string, colorTypes: ColorType[]) {
+        return `Color definitions of type ${colorTypeArrayToString(
+            colorTypes,
+        )} are blocked: "${line}"`;
     },
 };
 
@@ -168,7 +167,7 @@ function checkNode({
         });
 
         if (illegalColorTypes.length) {
-            report(ruleMessages.includesNonRequiredColorTypes(illegalColorTypes));
+            report(ruleMessages.includesBlockedColorTypes(node.toString(), illegalColorTypes));
             return;
         }
     } else if (ruleOptions.mode === DefaultOptionMode.BLOCK) {
@@ -182,7 +181,7 @@ function checkNode({
             return blockedTypes.includes(colorType);
         });
         if (illegalColorTypes.length) {
-            report(ruleMessages.includesBlockedColorTypes(illegalColorTypes));
+            report(ruleMessages.includesBlockedColorTypes(node.toString(), illegalColorTypes));
             return;
         }
     }
