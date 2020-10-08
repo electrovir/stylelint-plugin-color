@@ -9,11 +9,14 @@ import {
 } from 'stylelint-rule-creator';
 import * as parseValue from 'postcss-value-parser';
 import * as styleSearch from 'style-search';
-import {Node} from 'postcss-value-parser';
-import {AtRule, Declaration, parse, Root} from 'postcss';
+import {Node as ValueNode} from 'postcss-value-parser';
+import {AtRule, Declaration, parse, Root, Node} from 'postcss';
+import {AtRule as LessAtRule, VariableAtRule} from 'postcss-less';
 import * as colorObject from 'css-color-names';
 
 const colorNames = Object.keys(colorObject);
+
+type ColorTypesNode = Declaration | AtRule | VariableAtRule;
 
 function colorTypeArrayToString(colorTypes: ColorType[]): string {
     return `[${colorTypes.join(', ')}]`;
@@ -75,11 +78,11 @@ const defaultOptions: ColorTypesRuleOptions = {
     blockHelperFunctions: false,
 };
 
-function getColorFunctionName(node: Node): ColorType | undefined {
+function getColorFunctionName(node: ValueNode): ColorType | undefined {
     return colorFunctions[colorFunctions.indexOf(node.value as ColorType)];
 }
 
-export function getColorTypes(node: Declaration | AtRule): Set<ColorType> {
+export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
     const nodeString = node.toString();
     const nodeValue = (node as Declaration).value || (node as AtRule).params;
     const colorTypes = new Set<ColorType>();
@@ -132,13 +135,13 @@ function checkNodeBase({
     ruleMessages,
     ruleOptions,
 }: {
-    node: Declaration | AtRule;
+    node: ColorTypesNode;
     exceptionRegExps: ExceptionRegExps;
     baseReport: ReportCallback;
     ruleMessages: typeof messages;
     ruleOptions: Partial<ColorTypesRuleOptions> & DefaultRuleOptions;
 }) {
-    if (doesMatchLineExceptions(node, exceptionRegExps)) {
+    if (doesMatchLineExceptions(node as Node, exceptionRegExps)) {
         return;
     }
     const colorTypes = Array.from(getColorTypes(node));
@@ -150,7 +153,7 @@ function checkNodeBase({
     const report = (message: string) =>
         baseReport({
             message,
-            node: node,
+            node: node as Node,
             word: node.toString(),
         });
 
@@ -192,7 +195,7 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
     messages,
     defaultOptions,
     ruleCallback: (baseReport, messages, {ruleOptions, root, exceptionRegExps}) => {
-        function checkNode(node: Declaration | AtRule) {
+        function checkNode(node: ColorTypesNode) {
             checkNodeBase({
                 node,
                 exceptionRegExps,
@@ -202,9 +205,11 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
             });
         }
 
-        function checkAtRule(atRule: AtRule) {
-            if (atRule.name.endsWith(':')) {
+        function checkAtRule(atRule: ColorTypesNode) {
+            if ('variable' in atRule && atRule.variable) {
                 checkNode(atRule);
+            } else {
+                debugger;
             }
         }
 
