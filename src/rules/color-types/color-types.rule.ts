@@ -10,7 +10,7 @@ import {
 import * as parseValue from 'postcss-value-parser';
 import * as styleSearch from 'style-search';
 import {Node} from 'postcss-value-parser';
-import {AtRule, Declaration} from 'postcss';
+import {AtRule, Declaration, parse} from 'postcss';
 import * as colorObject from 'css-color-names';
 
 const colorNames = Object.keys(colorObject);
@@ -125,7 +125,7 @@ export function getColorTypes(node: Declaration | AtRule): Set<ColorType> {
 // mode require: all color definitions must be in the given types list
 // mode block: no color definitions can be in the given types list
 
-function checkNode({
+function checkNodeBase({
     node,
     exceptionRegExps,
     baseReport,
@@ -192,26 +192,49 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
     messages,
     defaultOptions,
     ruleCallback: (baseReport, messages, {ruleOptions, root, exceptionRegExps}) => {
-        // this catches less variable assignments
-        root.walkAtRules(atRule => {
-            if (atRule.name.endsWith(':')) {
-                checkNode({
-                    node: atRule,
-                    exceptionRegExps,
-                    baseReport,
-                    ruleMessages: messages,
-                    ruleOptions,
-                });
-            }
-        });
-        root.walkDecls(declaration =>
-            checkNode({
-                node: declaration,
+        function checkNode(node: Declaration | AtRule) {
+            checkNodeBase({
+                node,
                 exceptionRegExps,
                 baseReport,
                 ruleMessages: messages,
                 ruleOptions,
-            }),
-        );
+            });
+        }
+
+        function checkAtRule(atRule: AtRule) {
+            console.log(atRule.name);
+            // atRule.`
+            if (atRule.name.endsWith(':')) {
+                checkNode(atRule);
+            }
+        }
+
+        // this catches less mixin definitions
+        root.walkRules(rule => {
+            if (rule.selector.includes('@') && rule.selector.includes('(')) {
+                // extract out the mixin arguments
+                const mixinArgs = rule.selector
+                    .match(/\((?:\s*(.+?)\s*,\s*)*\s*(.+?)\s*\)/)
+                    ?.slice(1);
+                if (mixinArgs) {
+                    mixinArgs.forEach(mixinArgString => {
+                        if (mixinArgString) {
+                            // recombine the mixin arguments as declarations
+                            const mixinArgsAsRootNode = parse(mixinArgString);
+                            mixinArgsAsRootNode.walkAtRules(atRule => {
+                                checkAtRule(atRule);
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+        // this catches less variable assignments
+        root.walkAtRules(atRule => checkAtRule(atRule));
+
+        // this catches normal style declarations
+        root.walkDecls(declaration => checkNode(declaration));
     },
 });

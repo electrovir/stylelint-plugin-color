@@ -48,6 +48,18 @@ const allBlockedTests: (TestCase & {messageCode: string; messageType: ColorType}
         messageType: ColorType.named,
     },
     {
+        description: 'keyword colors',
+        code: '.mixin-definition(@my-color: blue) {}',
+        messageCode: '@my-color: blue',
+        messageType: ColorType.named,
+    },
+    {
+        description: 'keyword colors',
+        code: '.mixin-name(@varA: @my-color-A, @varB: @my-color-B, @varC: @white, @varD: white) {}',
+        messageCode: '@varD: white',
+        messageType: ColorType.named,
+    },
+    {
         description: 'rgb colors',
         code: 'div { color: rgb(0, 0, 0); }',
         messageCode: 'color: rgb(0, 0, 0)',
@@ -296,6 +308,35 @@ testDefaultRule({
                     ]),
                 };
             }),
+        },
+        {
+            ruleOptions: {
+                mode: DefaultOptionMode.BLOCK,
+                types: [
+                    ColorType.argb,
+                    ColorType.hex,
+                    ColorType.hsl,
+                    ColorType.hsla,
+                    ColorType.hsla,
+                    ColorType.hsv,
+                    ColorType.hsva,
+                    ColorType.named,
+                ],
+            },
+            description: 'defaults work as expected: block everything',
+            accept: variableAssignments,
+            reject: allBlockedTests
+                .filter(test => !test.messageType.includes('rgb'))
+                .map(test => {
+                    return {
+                        description: `block ${test.description}`,
+                        code: test.code,
+                        message: colorTypesRule.messages.includesBlockedColorTypes(
+                            test.messageCode,
+                            [test.messageType],
+                        ),
+                    };
+                }),
         },
     ],
 });
