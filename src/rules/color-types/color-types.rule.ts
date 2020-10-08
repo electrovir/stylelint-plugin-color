@@ -203,8 +203,6 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
         }
 
         function checkAtRule(atRule: AtRule) {
-            console.log(atRule.name);
-            // atRule.`
             if (atRule.name.endsWith(':')) {
                 checkNode(atRule);
             }
