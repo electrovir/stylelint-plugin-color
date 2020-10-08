@@ -1,6 +1,6 @@
 {
     "name": "stylelint-plugin-color",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Stylelint plugin for managing colors. Includes Less support.",
     "main": "dist/index.js",
     "scripts": {
@@ -31,24 +31,24 @@
     },
     "homepage": "https://github.com/electrovir/stylelint-plugin-color#readme",
     "peerDependencies": {
-        "stylelint": "^13.0.0"
+        "stylelint": "^13.7.2"
     },
     "devDependencies": {
         "@types/css-tree": "^1.0.3",
-        "@types/jest": "^26.0.0",
+        "@types/jest": "^26.0.14",
         "@types/stylelint": "^9.10.1",
-        "jest": "^26.0.1"
+        "jest": "^26.5.2"
     },
     "dependencies": {
-        "postcss": "^7.0.32",
-        "prettier": "~2.0.5",
-        "stylelint": "^13.6.1",
-        "typescript": "^3.9.5",
+        "postcss": "^8.1.1",
         "@types/style-search": "^0.1.1",
         "css-color-names": "^1.0.1",
         "css-tree": "^1.0.0-alpha.39",
         "postcss-value-parser": "^4.1.0",
+        "prettier": "~2.1.2",
         "style-search": "^0.1.0",
-        "stylelint-rule-creator": "^4.0.8"
+        "stylelint": "^13.6.1",
+        "stylelint-rule-creator": "^4.0.8",
+        "typescript": "^4.0.3"
     }
 }

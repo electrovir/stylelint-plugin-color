@@ -10,7 +10,7 @@ import {
 import * as parseValue from 'postcss-value-parser';
 import * as styleSearch from 'style-search';
 import {Node} from 'postcss-value-parser';
-import {AtRule, Declaration, parse} from 'postcss';
+import {AtRule, Declaration, parse, Root} from 'postcss';
 import * as colorObject from 'css-color-names';
 
 const colorNames = Object.keys(colorObject);
@@ -219,10 +219,17 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
                     mixinArgs.forEach(mixinArgString => {
                         if (mixinArgString) {
                             // recombine the mixin arguments as declarations
-                            const mixinArgsAsRootNode = parse(mixinArgString);
-                            mixinArgsAsRootNode.walkAtRules(atRule => {
-                                checkAtRule(atRule);
-                            });
+                            let mixinArgsAsRootNode: undefined | Root;
+                            try {
+                                mixinArgsAsRootNode = parse(mixinArgString);
+                            } catch (error) {
+                                // ignore errors parsing
+                            }
+                            if (mixinArgsAsRootNode) {
+                                mixinArgsAsRootNode.walkAtRules(atRule => {
+                                    checkAtRule(atRule);
+                                });
+                            }
                         }
                     });
                 }
@@ -230,9 +237,13 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
         });
 
         // this catches less variable assignments
-        root.walkAtRules(atRule => checkAtRule(atRule));
+        root.walkAtRules(atRule => {
+            checkAtRule(atRule);
+        });
 
         // this catches normal style declarations
-        root.walkDecls(declaration => checkNode(declaration));
+        root.walkDecls(declaration => {
+            checkNode(declaration);
+        });
     },
 });

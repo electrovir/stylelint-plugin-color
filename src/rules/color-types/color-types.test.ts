@@ -298,7 +298,13 @@ testDefaultRule({
         {
             ruleOptions: true,
             description: 'defaults work as expected: block everything',
-            accept: variableAssignments,
+            accept: [
+                ...variableAssignments,
+                {
+                    description: 'ignore parsing errors for mixin rule checking',
+                    code: 'div {& :not(.my-class-here) when (@thing = false) {}}',
+                },
+            ],
             reject: allBlockedTests.map(test => {
                 return {
                     description: `block ${test.description}`,
