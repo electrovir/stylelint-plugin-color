@@ -6,7 +6,7 @@
     "scripts": {
         "prepublishOnly": "npm run test",
         "test": "rm -rf dist; tsc && jest",
-        "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
+        "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
     },
     "repository": {
         "type": "git",

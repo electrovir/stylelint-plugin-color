@@ -11,11 +11,12 @@ import * as parseValue from 'postcss-value-parser';
 import * as styleSearch from 'style-search';
 import {Node as ValueNode} from 'postcss-value-parser';
 import {AtRule, Declaration, parse, Root, Node} from 'postcss';
-import {AtRule as LessAtRule, VariableAtRule} from 'postcss-less';
+import {AtRule as LessAtRule, VariableAtRule as LessVarAtRule} from 'postcss-less';
 import * as colorObject from 'css-color-names';
 
 const colorNames = Object.keys(colorObject);
 
+type VariableAtRule = AtRule & Pick<LessVarAtRule, 'variable'>;
 type ColorTypesNode = Declaration | AtRule | VariableAtRule;
 
 function colorTypeArrayToString(colorTypes: ColorType[]): string {
@@ -206,10 +207,9 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
         }
 
         function checkAtRule(atRule: ColorTypesNode) {
+            // only relevant for less syntax
             if ('variable' in atRule && atRule.variable) {
                 checkNode(atRule);
-            } else {
-                debugger;
             }
         }
 
@@ -232,6 +232,8 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
                             }
                             if (mixinArgsAsRootNode) {
                                 mixinArgsAsRootNode.walkAtRules(atRule => {
+                                    // we know at this point tha this at rule is indeed a variable
+                                    (atRule as VariableAtRule).variable = true;
                                     checkAtRule(atRule);
                                 });
                             }

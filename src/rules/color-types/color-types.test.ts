@@ -29,15 +29,15 @@ enum Syntax {
     css = 'css',
 }
 
-type PassTest = TestCase & {
+type AcceptSyntaxTest = TestCase & {
     // when no color type is provided, the test is expected to always pass, so no failure code is needed
     failureCode?: undefined;
     colorType: 'none';
 };
-type FailTest = TestCase & {failureCode: string; colorType: ColorType};
-type Test = FailTest | PassTest;
+type RejectSyntaxTest = TestCase & {failureCode: string; colorType: ColorType};
+type SyntaxTest = RejectSyntaxTest | AcceptSyntaxTest;
 
-const tests: {[key in Syntax]: Test[]} = {
+const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
     [Syntax.less]: [
         {
             description: 'allow less variable usage',
@@ -263,6 +263,16 @@ const tests: {[key in Syntax]: Test[]} = {
     ],
 };
 
+function rejectSyntaxTestToRejectTestCase(test: RejectSyntaxTest): RejectTestCase {
+    return {
+        ...test,
+        description: `reject ${test.description}`,
+        message: colorTypesRule.messages.includesBlockedColorTypes(test.failureCode, [
+            test.colorType,
+        ]),
+    };
+}
+
 /**
  * @param requireColorTypes     If true, the given color types are the only ones that should pass.
  *                            If false, the given color types should be the only ones that fail.
@@ -273,7 +283,7 @@ function generateSyntaxTests(
     requireColorTypes: boolean,
     syntax: Syntax,
 ): DefaultRuleTest<ColorTypesRuleOptions> {
-    function filterTest(accept: boolean, test: Test) {
+    function filterTest(accept: boolean, test: SyntaxTest) {
         if (test.colorType === 'none') {
             // always expect tests without a colortype to pass
             return accept;
@@ -299,8 +309,8 @@ function generateSyntaxTests(
         }
     }
 
-    const syntaxTests: Test[] = tests[syntax].concat(
-        syntax === Syntax.css ? [] : tests[Syntax.css],
+    const syntaxTests: SyntaxTest[] = testsBySyntax[syntax].concat(
+        syntax === Syntax.css ? [] : testsBySyntax[Syntax.css],
     );
 
     const acceptTests: TestCase[] = syntaxTests
@@ -313,50 +323,35 @@ function generateSyntaxTests(
         });
 
     const rejectTests: RejectTestCase[] = syntaxTests
-        .filter((test): test is FailTest => filterTest(false, test))
-        .map(
-            (test): RejectTestCase => {
-                return {
-                    ...test,
-                    description: `reject ${test.description}`,
-                    message: colorTypesRule.messages.includesBlockedColorTypes(test.failureCode, [
-                        test.colorType,
-                    ]),
-                };
-            },
-        );
+        .filter((test): test is RejectSyntaxTest => filterTest(false, test))
+        .map(rejectSyntaxTestToRejectTestCase);
 
     return {
         ruleOptions: {
             mode: requireColorTypes ? DefaultOptionMode.REQUIRE : DefaultOptionMode.BLOCK,
             types: colorTypes,
         },
+        linterOptions:
+            syntax === Syntax.css
+                ? // "css" isn't a syntax option
+                  {}
+                : {
+                      syntax: syntax,
+                  },
         description: `${syntax}`,
         accept: acceptTests,
         reject: rejectTests,
     };
 }
 
-// const defaultRule = {
-//     ruleOptions: true,
-//     description: 'defaults work as expected: block everything',
-//     accept: [
-//         ...variableAssignments,
-//         {
-//             description: 'ignore parsing errors for mixin rule checking',
-//             code: 'div {& :not(.my-class-here) when (@thing = false) {}}',
-//         },
-//     ],
-//     reject: allBlockedTests.map(test => {
-//         return {
-//             description: `block ${test.description}`,
-//             code: test.code,
-//             message: colorTypesRule.messages.includesBlockedColorTypes(test.messageCode, [
-//                 test.messageType,
-//             ]),
-//         };
-//     }),
-// };
+const defaultRule: DefaultRuleTest<ColorTypesRuleOptions> = {
+    ruleOptions: true,
+    description: 'defaults work as expected: block everything',
+    accept: testsBySyntax[Syntax.css].filter(test => test.colorType === 'none'),
+    reject: testsBySyntax[Syntax.css]
+        .filter((test): test is RejectSyntaxTest => test.colorType !== 'none')
+        .map(rejectSyntaxTestToRejectTestCase),
+};
 
 function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
     const testsMatrix: DefaultRuleTest<ColorTypesRuleOptions>[][] = getEnumTypedValues(Syntax).map(
@@ -380,5 +375,5 @@ function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
 testDefaultRule({
     rule: colorTypesRule,
     pluginPath: pluginPath,
-    tests: [...generateAllColorTests()],
+    tests: [defaultRule, ...generateAllColorTests()],
 });
