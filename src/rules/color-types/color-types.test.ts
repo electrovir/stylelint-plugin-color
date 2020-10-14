@@ -1,3 +1,4 @@
+import {LinterOptions} from 'stylelint';
 import {
     DefaultOptionMode,
     DefaultRuleOptions,
@@ -266,17 +267,25 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
 function rejectSyntaxTestToRejectTestCase(test: RejectSyntaxTest): RejectTestCase {
     return {
         ...test,
-        description: `reject ${test.description}`,
+        description: `reject "${test.description}" test`,
         message: colorTypesRule.messages.includesBlockedColorTypes(test.failureCode, [
             test.colorType,
         ]),
     };
 }
 
+function getLinterOptionsBySyntax(syntax: Syntax): Partial<LinterOptions> {
+    return syntax === Syntax.css
+        ? // "css" isn't a syntax option
+          {}
+        : {
+              syntax: syntax,
+          };
+}
+
 /**
  * @param requireColorTypes     If true, the given color types are the only ones that should pass.
- *                            If false, the given color types should be the only ones that fail.
- *
+ *                              If false, the given color types should be the only ones that fail.
  */
 function generateSyntaxTests(
     colorTypes: ColorType[],
@@ -318,7 +327,7 @@ function generateSyntaxTests(
         .map(test => {
             return {
                 ...test,
-                description: `allow ${test.description}`,
+                description: `allow "${test.description}" test`,
             };
         });
 
@@ -331,27 +340,32 @@ function generateSyntaxTests(
             mode: requireColorTypes ? DefaultOptionMode.REQUIRE : DefaultOptionMode.BLOCK,
             types: colorTypes,
         },
-        linterOptions:
-            syntax === Syntax.css
-                ? // "css" isn't a syntax option
-                  {}
-                : {
-                      syntax: syntax,
-                  },
-        description: `${syntax}`,
+        linterOptions: getLinterOptionsBySyntax(syntax),
+        description: `tests for "${syntax}" syntax`,
         accept: acceptTests,
         reject: rejectTests,
     };
 }
 
-const defaultRule: DefaultRuleTest<ColorTypesRuleOptions> = {
-    ruleOptions: true,
-    description: 'defaults work as expected: block everything',
-    accept: testsBySyntax[Syntax.css].filter(test => test.colorType === 'none'),
-    reject: testsBySyntax[Syntax.css]
-        .filter((test): test is RejectSyntaxTest => test.colorType !== 'none')
-        .map(rejectSyntaxTestToRejectTestCase),
-};
+function generateDefaultRuleTest(syntax: Syntax): DefaultRuleTest<ColorTypesRuleOptions> {
+    const tests = testsBySyntax[syntax].concat(
+        syntax === Syntax.css ? [] : testsBySyntax[Syntax.css],
+    );
+
+    return {
+        ruleOptions: true,
+        linterOptions: getLinterOptionsBySyntax(syntax),
+        description: `defaults work as expected: block everything for "${syntax}" syntax`,
+        accept: tests.filter(test => test.colorType === 'none'),
+        reject: tests
+            .filter((test): test is RejectSyntaxTest => test.colorType !== 'none')
+            .map(rejectSyntaxTestToRejectTestCase),
+    };
+}
+
+function generateAllDefaultRuleTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
+    return getEnumTypedValues(Syntax).map(generateDefaultRuleTest);
+}
 
 function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
     const testsMatrix: DefaultRuleTest<ColorTypesRuleOptions>[][] = getEnumTypedValues(Syntax).map(
@@ -375,5 +389,5 @@ function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
 testDefaultRule({
     rule: colorTypesRule,
     pluginPath: pluginPath,
-    tests: [defaultRule, ...generateAllColorTests()],
+    tests: [...generateAllDefaultRuleTests(), ...generateAllColorTests()],
 });
