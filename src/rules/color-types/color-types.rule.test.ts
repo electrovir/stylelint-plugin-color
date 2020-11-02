@@ -1,7 +1,6 @@
 import {LinterOptions} from 'stylelint';
 import {
     DefaultOptionMode,
-    DefaultRuleOptions,
     DefaultRuleTest,
     RejectTestCase,
     TestCase,
