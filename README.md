@@ -1,8 +1,14 @@
 # Stylelint Plugin Color
 
-Stylelint plugin for managing colors. Includes Less support.
+Stylelint plugin for managing colors. Includes Less and Scss support.
 
-_WIP_ not published in working order yet.
+# Rules
+
+Go to each rule's page (click on the name below) to see specific details.
+
+| Rule                                              | auto-fix |
+| ------------------------------------------------- | -------- |
+| [plugin-color/color-types](src/rules/color-types) | none     |
 
 # Rule Options
 
@@ -61,11 +67,3 @@ All rules respect the following primary option format and _no_ secondary options
         ],
     }
     ```
-
-# Rules
-
-Go to each rule's page (click on the name below) to see specific details.
-
-| Rule                                              | auto-fix |
-| ------------------------------------------------- | -------- |
-| [plugin-color/color-types](src/rules/color-types) |          |

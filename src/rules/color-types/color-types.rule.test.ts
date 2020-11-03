@@ -388,5 +388,71 @@ function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
 testDefaultRule({
     rule: colorTypesRule,
     pluginPath: pluginPath,
-    tests: [...generateAllDefaultRuleTests(), ...generateAllColorTests()],
+    tests: [
+        ...generateAllDefaultRuleTests(),
+        ...generateAllColorTests(),
+        {
+            ruleOptions: {
+                mode: DefaultOptionMode.REQUIRE,
+                types: [ColorType.hex, ColorType.named, ColorType.rgb],
+            },
+            description: 'multiple types work',
+            accept: [
+                {
+                    code: `div {
+                        color: #00F;
+                        background-color: rgb(0, 0, 255);
+                        border-color: blue;
+                    }`,
+                },
+            ],
+            reject: [
+                {
+                    code: `div {
+                        color: hsl(240, 100%, 50%);
+                    }`,
+                    message: colorTypesRule.messages.includesBlockedColorTypes(
+                        `color: hsl(240, 100%, 50%)`,
+                        [ColorType.hsl],
+                    ),
+                },
+                {
+                    code: `div {
+                        color: hsla(240, 100%, 50%, 0.5);
+                    }`,
+                    message: colorTypesRule.messages.includesBlockedColorTypes(
+                        `color: hsla(240, 100%, 50%, 0.5)`,
+                        [ColorType.hsla],
+                    ),
+                },
+                {
+                    code: `div {
+                        background-color: rgba(0, 0, 255, 1);
+                    }`,
+                    message: colorTypesRule.messages.includesBlockedColorTypes(
+                        `background-color: rgba(0, 0, 255, 1)`,
+                        [ColorType.rgba],
+                    ),
+                },
+                {
+                    code: `div {
+                        border-color: hsv(240, 100%, 100%);
+                    }`,
+                    message: colorTypesRule.messages.includesBlockedColorTypes(
+                        `border-color: hsv(240, 100%, 100%)`,
+                        [ColorType.hsv],
+                    ),
+                },
+                {
+                    code: `div {
+                        border-color: hsva(240, 100%, 100%, 0.5);
+                    }`,
+                    message: colorTypesRule.messages.includesBlockedColorTypes(
+                        `border-color: hsva(240, 100%, 100%, 0.5)`,
+                        [ColorType.hsva],
+                    ),
+                },
+            ],
+        },
+    ],
 });
