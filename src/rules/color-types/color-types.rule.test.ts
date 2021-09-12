@@ -75,6 +75,50 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             colorType: ColorType.named,
         },
         {
+            // this was broken at one point
+            description: "mixin syntax isn't broken",
+            code: `
+                .myMixin() {
+                    font-family: serif;
+                }
+                
+                div {
+                    .myMixin();
+                    color: #123;
+                }`,
+            failureCode: 'color: #123',
+            colorType: ColorType.hex,
+        },
+        {
+            description: 'catch hex values in first mixin argument',
+            code: `
+                .myMixin(@colorVal) {
+                    color: @colorVal;
+                }
+                
+                div {
+                    .myMixin(#123);
+                }`,
+            // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
+            failureCode: '@myMixin(#123)',
+            colorType: ColorType.hex,
+        },
+        {
+            description: 'catch hex values in first mixin argument',
+            code: `
+                .myMixin(@colorVal, @colorVal2) {
+                    color: @colorVal;
+                    background-color: @colorVal2;
+                }
+                
+                div {
+                    .myMixin(#123, #123456);
+                }`,
+            // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
+            failureCode: '@myMixin(#123, #123456)',
+            colorType: ColorType.hex,
+        },
+        {
             description: 'assigning rgb colors to less variables',
             code: '@myVar: rgb(0, 0, 0);',
             failureCode: '@myVar: rgb(0, 0, 0)',
