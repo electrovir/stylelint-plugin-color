@@ -30,7 +30,10 @@
     "main": "dist/index.js",
     "scripts": {
         "prepublishOnly": "npm run test",
+        "spellcheck": "virmator spellcheck",
         "test": "rm -rf dist; tsc && jest",
+        "test:full": "npm test && npm run spellcheck && virmator format check",
+        "format": "virmator format write",
         "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
     },
     "dependencies": {
@@ -50,7 +53,7 @@
         "@types/postcss-less": "^4.0.1",
         "@types/stylelint": "^13.13.2",
         "jest": "^27.1.1",
-        "virmator": "^1.1.10"
+        "virmator": "^1.1.11"
     },
     "peerDependencies": {
         "stylelint": "^13.13.1"

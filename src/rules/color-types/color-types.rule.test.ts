@@ -15,12 +15,12 @@ function getObjectTypedKeys<T extends object>(input: T): (keyof T)[] {
 
 function getEnumTypedKeys<T extends object>(input: T): (keyof T)[] {
     // keys are always strings
-    return getObjectTypedKeys(input).filter(key => isNaN(Number(key))) as (keyof T)[];
+    return getObjectTypedKeys(input).filter((key) => isNaN(Number(key))) as (keyof T)[];
 }
 
 function getEnumTypedValues<T extends object>(input: T): T[keyof T][] {
     const keys = getEnumTypedKeys(input);
-    return keys.map(key => input[key]);
+    return keys.map((key) => input[key]);
 }
 
 enum Syntax {
@@ -52,8 +52,7 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
         },
         {
             description: 'keyword in long mixin definition',
-            code:
-                '.mixin-name(@varA: @my-color-A, @varB: @my-color-B, @varC: @white, @varD: white) {}',
+            code: '.mixin-name(@varA: @my-color-A, @varB: @my-color-B, @varC: @white, @varD: white) {}',
             failureCode: '@varD: white',
             colorType: ColorType.named,
         },
@@ -283,8 +282,8 @@ function getLinterOptionsBySyntax(syntax: Syntax): Partial<LinterOptions> {
 }
 
 /**
- * @param requireColorTypes     If true, the given color types are the only ones that should pass.
- *                              If false, the given color types should be the only ones that fail.
+ * @param requireColorTypes If true, the given color types are the only ones that should pass. If
+ *   false, the given color types should be the only ones that fail.
  */
 function generateSyntaxTests(
     colorTypes: ColorType[],
@@ -293,7 +292,7 @@ function generateSyntaxTests(
 ): DefaultRuleTest<ColorTypesRuleOptions> {
     function filterTest(accept: boolean, test: SyntaxTest) {
         if (test.colorType === 'none') {
-            // always expect tests without a colortype to pass
+            // always expect tests without a color type to pass
             return accept;
         }
 
@@ -322,8 +321,8 @@ function generateSyntaxTests(
     );
 
     const acceptTests: TestCase[] = syntaxTests
-        .filter(test => filterTest(true, test))
-        .map(test => {
+        .filter((test) => filterTest(true, test))
+        .map((test) => {
             return {
                 ...test,
                 description: `allow "${test.description}" test`,
@@ -355,7 +354,7 @@ function generateDefaultRuleTest(syntax: Syntax): DefaultRuleTest<ColorTypesRule
         ruleOptions: true,
         linterOptions: getLinterOptionsBySyntax(syntax),
         description: `defaults work as expected: block everything for "${syntax}" syntax`,
-        accept: tests.filter(test => test.colorType === 'none'),
+        accept: tests.filter((test) => test.colorType === 'none'),
         reject: tests
             .filter((test): test is RejectSyntaxTest => test.colorType !== 'none')
             .map(rejectSyntaxTestToRejectTestCase),
@@ -369,20 +368,32 @@ function generateAllDefaultRuleTests(): DefaultRuleTest<ColorTypesRuleOptions>[]
 function generateAllColorTests(): DefaultRuleTest<ColorTypesRuleOptions>[] {
     const testsMatrix: DefaultRuleTest<ColorTypesRuleOptions>[][] = getEnumTypedValues(Syntax).map(
         (syntax): DefaultRuleTest<ColorTypesRuleOptions>[] => {
-            const colorTests = getEnumTypedValues(ColorType).map((colorType): DefaultRuleTest<
-                ColorTypesRuleOptions
-            >[] => {
-                return [
-                    generateSyntaxTests([colorType], false, syntax),
-                    generateSyntaxTests([colorType], true, syntax),
-                ];
-            });
+            const colorTests = getEnumTypedValues(ColorType).map(
+                (colorType): DefaultRuleTest<ColorTypesRuleOptions>[] => {
+                    return [
+                        generateSyntaxTests([colorType], false, syntax),
+                        generateSyntaxTests([colorType], true, syntax),
+                    ];
+                },
+            );
 
-            return colorTests[0].concat(...colorTests.slice(1));
+            const firstTest = colorTests[0];
+
+            if (!firstTest) {
+                throw new Error(`Couldn't find first test in array of tests.`);
+            }
+
+            return firstTest.concat(...colorTests.slice(1));
         },
     );
 
-    return testsMatrix[0].concat(...testsMatrix.slice(1));
+    const firstTestMatrixEntry = testsMatrix[0];
+
+    if (!firstTestMatrixEntry) {
+        throw new Error(`Couldn't find first entry in testMatrix.`);
+    }
+
+    return firstTestMatrixEntry.concat(...testsMatrix.slice(1));
 }
 
 testDefaultRule({

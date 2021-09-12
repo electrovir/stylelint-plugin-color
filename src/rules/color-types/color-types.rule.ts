@@ -1,4 +1,8 @@
-import {prefix} from '../../plugin-util';
+import * as colorObject from 'css-color-names';
+import {AtRule, Declaration, Node, parse, Root} from 'postcss';
+import {VariableAtRule as LessVarAtRule} from 'postcss-less';
+import parseValue, {Node as ValueNode} from 'postcss-value-parser';
+import styleSearch from 'style-search';
 import {
     createDefaultRule,
     DefaultOptionMode,
@@ -7,12 +11,7 @@ import {
     ExceptionRegExps,
     ReportCallback,
 } from 'stylelint-rule-creator';
-import * as parseValue from 'postcss-value-parser';
-import * as styleSearch from 'style-search';
-import {Node as ValueNode} from 'postcss-value-parser';
-import {AtRule, Declaration, parse, Root, Node} from 'postcss';
-import {AtRule as LessAtRule, VariableAtRule as LessVarAtRule} from 'postcss-less';
-import * as colorObject from 'css-color-names';
+import {prefix} from '../../plugin-util';
 
 const colorNames = Object.keys(colorObject);
 
@@ -88,7 +87,7 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
     const nodeValue = (node as Declaration).value || (node as AtRule).params;
     const colorTypes = new Set<ColorType>();
 
-    parseValue(nodeValue).walk(node => {
+    parseValue(nodeValue).walk((node) => {
         // check for color functions
         if (node.type === 'function') {
             const colorFunctionName = getColorFunctionName(node);
@@ -108,9 +107,10 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
     let hexFound = false;
 
     // check for color hex values
-    styleSearch({source: nodeString, target: '#'}, match => {
+    styleSearch({source: nodeString, target: '#'}, (match) => {
         // this is how the stylelint rule color-no-hex reads hex values
-        if (!/[:,\s]/.test(nodeString[match.startIndex - 1]) || hexFound) {
+        const preHexLetter = nodeString[match.startIndex - 1];
+        if (!preHexLetter || !/[:,\s]/.test(preHexLetter) || hexFound) {
             return;
         }
 
@@ -166,7 +166,7 @@ function checkNodeBase({
             return;
         }
 
-        const illegalColorTypes = colorTypes.filter(colorType => {
+        const illegalColorTypes = colorTypes.filter((colorType) => {
             return !requiredTypes.includes(colorType);
         });
 
@@ -181,7 +181,7 @@ function checkNodeBase({
             return;
         }
 
-        const illegalColorTypes = colorTypes.filter(colorType => {
+        const illegalColorTypes = colorTypes.filter((colorType) => {
             return blockedTypes.includes(colorType);
         });
         if (illegalColorTypes.length) {
@@ -214,14 +214,14 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
         }
 
         // this catches less mixin definitions
-        root.walkRules(rule => {
+        root.walkRules((rule) => {
             if (rule.selector.includes('@') && rule.selector.includes('(')) {
                 // extract out the mixin arguments
                 const mixinArgs = rule.selector
                     .match(/\((?:\s*(.+?)\s*,\s*)*\s*(.+?)\s*\)/)
                     ?.slice(1);
                 if (mixinArgs) {
-                    mixinArgs.forEach(mixinArgString => {
+                    mixinArgs.forEach((mixinArgString) => {
                         if (mixinArgString) {
                             // recombine the mixin arguments as declarations
                             let mixinArgsAsRootNode: undefined | Root;
@@ -231,7 +231,7 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
                                 // ignore errors parsing
                             }
                             if (mixinArgsAsRootNode) {
-                                mixinArgsAsRootNode.walkAtRules(atRule => {
+                                mixinArgsAsRootNode.walkAtRules((atRule) => {
                                     // we know at this point tha this at rule is indeed a variable
                                     (atRule as VariableAtRule).variable = true;
                                     checkAtRule(atRule);
@@ -244,12 +244,12 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
         });
 
         // this catches less variable assignments
-        root.walkAtRules(atRule => {
+        root.walkAtRules((atRule) => {
             checkAtRule(atRule);
         });
 
         // this catches normal style declarations
-        root.walkDecls(declaration => {
+        root.walkDecls((declaration) => {
             checkNode(declaration);
         });
     },

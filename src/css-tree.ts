@@ -1,6 +1,6 @@
 // may not actually need this at all
 import * as cssTreeRaw from 'css-tree';
-import {parse as ParseRaw, SyntaxParseError, CssNode} from 'css-tree';
+import {CssNode, SyntaxParseError} from 'css-tree';
 export * from 'css-tree';
 
 export type Matched = {

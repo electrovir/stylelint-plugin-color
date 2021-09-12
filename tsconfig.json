@@ -1,15 +1,6 @@
 {
     "compilerOptions": {
-        "alwaysStrict": true,
-        "declaration": true,
-        "forceConsistentCasingInFileNames": true,
-        "module": "commonjs",
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "outDir": "dist",
-        "resolveJsonModule": true,
-        "rootDir": "src",
-        "strict": true,
-        "target": "ES2018"
-    }
+        "resolveJsonModule": true
+    },
+    "extends": "./tsconfig-base.json"
 }
