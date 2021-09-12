@@ -69,6 +69,7 @@ function checkNodeBase({
         return;
     }
     const colorTypes = Array.from(getColorTypes(node));
+
     if (!colorTypes.length) {
         // nothing to check if there are no color types in the current declaration
         return;
@@ -131,7 +132,11 @@ export const colorTypesRule = createDefaultRule<typeof messages, ColorTypesRuleO
 
         function checkAtRule(atRule: ColorTypesNode) {
             // only relevant for less syntax
-            if ('variable' in atRule && atRule.variable) {
+            if (
+                ('variable' in atRule && atRule.variable) ||
+                // when mixins are called in less, like .myMixin(), they are turned into at rules
+                ('mixin' in atRule && atRule.mixin)
+            ) {
                 checkNode(atRule);
             }
         }

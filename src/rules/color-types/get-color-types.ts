@@ -1,6 +1,6 @@
 import * as colorNamesObject from 'css-color-names';
 import {AtRule, Declaration} from 'postcss';
-import {VariableAtRule as LessVarAtRule} from 'postcss-less';
+import {MixinAtRule as LessMixinAtRule, VariableAtRule as LessVarAtRule} from 'postcss-less';
 import parseValue, {Node as ValueNode} from 'postcss-value-parser';
 import styleSearch from 'style-search';
 
@@ -16,8 +16,7 @@ export enum ColorType {
     argb = 'argb',
 }
 
-type VariableAtRule = AtRule & Pick<LessVarAtRule, 'variable'>;
-export type ColorTypesNode = Declaration | AtRule | VariableAtRule;
+export type ColorTypesNode = Declaration | AtRule | LessVarAtRule | LessMixinAtRule;
 
 const colorNames = Object.keys(colorNamesObject);
 
@@ -63,7 +62,15 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
     styleSearch({source: nodeString, target: '#'}, (match) => {
         // this is how the stylelint rule color-no-hex reads hex values
         const preHexLetter = nodeString[match.startIndex - 1];
-        if (!preHexLetter || !/[:,\s]/.test(preHexLetter) || hexFound) {
+        if (hexFound) {
+            return;
+        } else if (!preHexLetter) {
+            return;
+        } else if ('mixin' in node && node.mixin && preHexLetter === '(') {
+            // don't return
+        } else if (preHexLetter.match(/[:,\s]/)) {
+            // don't return
+        } else {
             return;
         }
 
