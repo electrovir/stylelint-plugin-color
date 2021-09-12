@@ -33,9 +33,9 @@ enum Syntax {
 type AcceptSyntaxTest = TestCase & {
     // when no color type is provided, the test is expected to always pass, so no failure code is needed
     failureCode?: undefined;
-    colorType: 'none';
+    colorTypes: never[];
 };
-type RejectSyntaxTest = TestCase & {failureCode: string; colorType: ColorType};
+type RejectSyntaxTest = TestCase & {failureCode: string; colorTypes: ColorType[]};
 type SyntaxTest = RejectSyntaxTest | AcceptSyntaxTest;
 
 const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
@@ -43,36 +43,36 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
         {
             description: 'allow less variable usage',
             code: 'div { color: @myVar; }',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'keyword color in mixin definition',
             code: '.mixin-definition(@my-color: blue) {}',
             failureCode: '@my-color: blue',
-            colorType: ColorType.named,
+            colorTypes: [ColorType.named],
         },
         {
             description: 'keyword in long mixin definition',
             code: '.mixin-name(@varA: @my-color-A, @varB: @my-color-B, @varC: @white, @varD: white) {}',
             failureCode: '@varD: white',
-            colorType: ColorType.named,
+            colorTypes: [ColorType.named],
         },
         {
             description: 'allow less variable reassignment',
             code: '@myVar: @otherVar;',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'assigning hex colors to less variables',
             code: '@myVar: #000000;',
             failureCode: '@myVar: #000000',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'assigning keyword colors to less variables',
             code: '@myVar: blue;',
             failureCode: '@myVar: blue',
-            colorType: ColorType.named,
+            colorTypes: [ColorType.named],
         },
         {
             // this was broken at one point
@@ -87,7 +87,7 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
                     color: #123;
                 }`,
             failureCode: 'color: #123',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'catch hex values in first mixin argument',
@@ -101,7 +101,7 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
                 }`,
             // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
             failureCode: '@myMixin(#123)',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'catch hex values in first mixin argument',
@@ -116,204 +116,238 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
                 }`,
             // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
             failureCode: '@myMixin(#123, #123456)',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
+        },
+        {
+            description: 'catch hex values in first mixin argument',
+            code: `
+                .myMixin(@colorVal, @colorVal2) {
+                    color: @colorVal;
+                    background-color: @colorVal2;
+                }
+                
+                div {
+                    .myMixin(blue, rgb(255, 0, 200));
+                }`,
+            // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
+            failureCode: '@myMixin(blue, rgb(255, 0, 200))',
+            colorTypes: [ColorType.named, ColorType.rgb],
         },
         {
             description: 'assigning rgb colors to less variables',
             code: '@myVar: rgb(0, 0, 0);',
             failureCode: '@myVar: rgb(0, 0, 0)',
-            colorType: ColorType.rgb,
+            colorTypes: [ColorType.rgb],
         },
         {
             description: 'assigning rgba colors to less variables',
             code: '@myVar: rgba(0, 0, 0, 0);',
             failureCode: '@myVar: rgba(0, 0, 0, 0)',
-            colorType: ColorType.rgba,
+            colorTypes: [ColorType.rgba],
         },
         {
             description: 'assigning hsl colors to less variables',
             code: '@myVar: hsl(0, 0%, 0%);',
             failureCode: '@myVar: hsl(0, 0%, 0%)',
-            colorType: ColorType.hsl,
+            colorTypes: [ColorType.hsl],
         },
         {
             description: 'assigning hsla colors to less variables',
             code: '@myVar: hsla(0, 0%, 0%, 0);',
             failureCode: '@myVar: hsla(0, 0%, 0%, 0)',
-            colorType: ColorType.hsla,
+            colorTypes: [ColorType.hsla],
         },
         {
             description: 'assigning hsv colors to less variables',
             code: '@myVar: hsv(0, 0%, 0%);',
             failureCode: '@myVar: hsv(0, 0%, 0%)',
-            colorType: ColorType.hsv,
+            colorTypes: [ColorType.hsv],
         },
         {
             description: 'assigning hsva colors to less variables',
             code: '@myVar: hsva(0, 0%, 0%, 0);',
             failureCode: '@myVar: hsva(0, 0%, 0%, 0)',
-            colorType: ColorType.hsva,
+            colorTypes: [ColorType.hsva],
         },
         {
             description: 'assigning argb colors to less variables',
             code: '@myVar: argb(#000000);',
             failureCode: '@myVar: argb(#000000)',
-            colorType: ColorType.argb,
+            colorTypes: [ColorType.argb],
         },
     ],
     [Syntax.scss]: [
         {
             description: 'allow SCSS variable usage',
             code: 'div { color: $myVar; }',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'allow SCSS variable reassignment',
             code: '$myVar: $otherVar',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'assigning hex colors to scss variables',
             code: '$myVar: #000000;',
             failureCode: '$myVar: #000000',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'assigning keyword colors to scss variables',
             code: '$myVar: blue;',
             failureCode: '$myVar: blue',
-            colorType: ColorType.named,
+            colorTypes: [ColorType.named],
         },
         {
             description: 'assigning rgb colors to scss variables',
             code: '$myVar: rgb(0, 0, 0);',
             failureCode: '$myVar: rgb(0, 0, 0)',
-            colorType: ColorType.rgb,
+            colorTypes: [ColorType.rgb],
         },
         {
             description: 'assigning rgba colors to scss variables',
             code: '$myVar: rgba(0, 0, 0, 0);',
             failureCode: '$myVar: rgba(0, 0, 0, 0)',
-            colorType: ColorType.rgba,
+            colorTypes: [ColorType.rgba],
         },
         {
             description: 'assigning hsl colors to scss variables',
             code: '$myVar: hsl(0, 0%, 0%);',
             failureCode: '$myVar: hsl(0, 0%, 0%)',
-            colorType: ColorType.hsl,
+            colorTypes: [ColorType.hsl],
         },
         {
             description: 'assigning hsla colors to scss variables',
             code: '$myVar: hsla(0, 0%, 0%, 0);',
             failureCode: '$myVar: hsla(0, 0%, 0%, 0)',
-            colorType: ColorType.hsla,
+            colorTypes: [ColorType.hsla],
         },
         {
             description: 'assigning hsv colors to scss variables',
             code: '$myVar: hsv(0, 0%, 0%);',
             failureCode: '$myVar: hsv(0, 0%, 0%)',
-            colorType: ColorType.hsv,
+            colorTypes: [ColorType.hsv],
         },
         {
             description: 'assigning hsva colors to scss variables',
             code: '$myVar: hsva(0, 0%, 0%, 0);',
             failureCode: '$myVar: hsva(0, 0%, 0%, 0)',
-            colorType: ColorType.hsva,
+            colorTypes: [ColorType.hsva],
         },
         {
             description: 'assigning argb colors to scss variables',
             code: '$myVar: argb(#000000);',
             failureCode: '$myVar: argb(#000000)',
-            colorType: ColorType.argb,
+            colorTypes: [ColorType.argb],
         },
     ],
     [Syntax.css]: [
         {
             description: 'allow CSS variable usage',
             code: 'div { color: var(--my-var); }',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'allow CSS variable reassignment',
             code: 'div { --my-var: var(--other-var); }',
-            colorType: 'none',
+            colorTypes: [],
         },
         {
             description: 'hex colors (3 character shortcut)',
             code: 'div { color: #000; }',
             failureCode: 'color: #000',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'hex colors',
             code: 'div { color: #000000; }',
             failureCode: 'color: #000000',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'hex colors (with alpha)',
             code: 'div { color: #00000000; }',
             failureCode: 'color: #00000000',
-            colorType: ColorType.hex,
+            colorTypes: [ColorType.hex],
         },
         {
             description: 'keyword color',
             code: 'div { color: blue; }',
             failureCode: 'color: blue',
-            colorType: ColorType.named,
+            colorTypes: [ColorType.named],
         },
         {
             description: 'rgb colors',
             code: 'div { color: rgb(0, 0, 0); }',
             failureCode: 'color: rgb(0, 0, 0)',
-            colorType: ColorType.rgb,
+            colorTypes: [ColorType.rgb],
         },
         {
             description: 'rgba colors',
             code: 'div { color: rgba(0, 0, 0, 0); }',
             failureCode: 'color: rgba(0, 0, 0, 0)',
-            colorType: ColorType.rgba,
+            colorTypes: [ColorType.rgba],
         },
         {
             description: 'hsl colors',
             code: 'div { color: hsl(0, 0%, 0%); }',
             failureCode: 'color: hsl(0, 0%, 0%)',
-            colorType: ColorType.hsl,
+            colorTypes: [ColorType.hsl],
         },
         {
             description: 'hsla colors',
             code: 'div { color: hsla(0, 0%, 0%, 0); }',
             failureCode: 'color: hsla(0, 0%, 0%, 0)',
-            colorType: ColorType.hsla,
+            colorTypes: [ColorType.hsla],
         },
         {
             description: 'hsv colors',
             code: 'div { color: hsv(0, 0%, 0%); }',
             failureCode: 'color: hsv(0, 0%, 0%)',
-            colorType: ColorType.hsv,
+            colorTypes: [ColorType.hsv],
         },
         {
             description: 'hsva colors',
             code: 'div { color: hsva(0, 0%, 0%, 0); }',
             failureCode: 'color: hsva(0, 0%, 0%, 0)',
-            colorType: ColorType.hsva,
+            colorTypes: [ColorType.hsva],
         },
         {
             description: 'argb colors',
             code: 'div { color: argb(#000000); }',
             failureCode: 'color: argb(#000000)',
-            colorType: ColorType.argb,
+            colorTypes: [ColorType.argb],
         },
     ],
 };
 
-function rejectSyntaxTestToRejectTestCase(test: RejectSyntaxTest): RejectTestCase {
+function rejectSyntaxTestToRejectTestCase(
+    test: RejectSyntaxTest,
+    /**
+     * When this is true, then colorTypes (passed in below) are GOOD. When this is false then the
+     * colorTypes passed are BAD.
+     */
+    requireColorTypes: boolean,
+    colorTypes: ColorType[],
+): RejectTestCase {
+    const failureColorTypes = test.colorTypes.filter((colorType) => {
+        const included = colorTypes.includes(colorType);
+
+        if (requireColorTypes) {
+            return !included;
+        } else {
+            return included;
+        }
+    });
+
     return {
         ...test,
         description: `reject "${test.description}" test`,
-        message: colorTypesRule.messages.includesBlockedColorTypes(test.failureCode, [
-            test.colorType,
-        ]),
+        message: colorTypesRule.messages.includesBlockedColorTypes(
+            test.failureCode,
+            failureColorTypes,
+        ),
     };
 }
 
@@ -336,16 +370,20 @@ function generateSyntaxTests(
     syntax: Syntax,
 ): DefaultRuleTest<ColorTypesRuleOptions> {
     function filterTest(accept: boolean, test: SyntaxTest) {
-        if (test.colorType === 'none') {
+        if (!test.colorTypes.length) {
             // always expect tests without a color type to pass
             return accept;
         }
 
-        const includesColorType = colorTypes.includes(test.colorType);
+        const tester = requireColorTypes ? 'every' : 'some';
+
+        const includesColorTypes = test.colorTypes[tester]((colorType) =>
+            colorTypes.includes(colorType),
+        );
 
         // mode set to require
         if (requireColorTypes) {
-            if (includesColorType) {
+            if (includesColorTypes) {
                 return accept;
             } else {
                 return !accept;
@@ -353,7 +391,7 @@ function generateSyntaxTests(
         }
         // mode set to block
         else {
-            if (includesColorType) {
+            if (includesColorTypes) {
                 return !accept;
             } else {
                 return accept;
@@ -376,7 +414,7 @@ function generateSyntaxTests(
 
     const rejectTests: RejectTestCase[] = syntaxTests
         .filter((test): test is RejectSyntaxTest => filterTest(false, test))
-        .map(rejectSyntaxTestToRejectTestCase);
+        .map((test) => rejectSyntaxTestToRejectTestCase(test, requireColorTypes, colorTypes));
 
     return {
         ruleOptions: {
@@ -399,10 +437,12 @@ function generateDefaultRuleTest(syntax: Syntax): DefaultRuleTest<ColorTypesRule
         ruleOptions: true,
         linterOptions: getLinterOptionsBySyntax(syntax),
         description: `defaults work as expected: block everything for "${syntax}" syntax`,
-        accept: tests.filter((test) => test.colorType === 'none'),
+        accept: tests.filter((test) => !test.colorTypes.length),
         reject: tests
-            .filter((test): test is RejectSyntaxTest => test.colorType !== 'none')
-            .map(rejectSyntaxTestToRejectTestCase),
+            .filter((test): test is RejectSyntaxTest => !!test.colorTypes.length)
+            .map((test) =>
+                rejectSyntaxTestToRejectTestCase(test, false, getEnumTypedValues(ColorType)),
+            ),
     };
 }
 
