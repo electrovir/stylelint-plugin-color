@@ -1,17 +1,7 @@
 {
     "name": "stylelint-plugin-color",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Stylelint plugin for managing colors. Includes Less support.",
-    "main": "dist/index.js",
-    "scripts": {
-        "prepublishOnly": "npm run test",
-        "test": "rm -rf dist; tsc && jest",
-        "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/electrovir/stylelint-plugin-color.git"
-    },
     "keywords": [
         "color",
         "linter",
@@ -24,33 +14,45 @@
         "hex",
         "rgb"
     ],
-    "author": "electrovir (github.com/electrovir)",
-    "license": "MIT",
+    "homepage": "https://github.com/electrovir/stylelint-plugin-color#readme",
     "bugs": {
         "url": "https://github.com/electrovir/stylelint-plugin-color/issues"
     },
-    "homepage": "https://github.com/electrovir/stylelint-plugin-color#readme",
-    "peerDependencies": {
-        "stylelint": "^13.7.2"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/electrovir/stylelint-plugin-color.git"
     },
-    "devDependencies": {
-        "@types/css-tree": "^1.0.3",
-        "@types/jest": "^26.0.14",
-        "@types/postcss-less": "^3.1.1",
-        "@types/stylelint": "^9.10.1",
-        "jest": "^26.5.2"
+    "license": "MIT",
+    "author": {
+        "name": "electrovir",
+        "url": "https://github.com/electrovir"
+    },
+    "main": "dist/index.js",
+    "scripts": {
+        "prepublishOnly": "npm run test",
+        "test": "rm -rf dist; tsc && jest",
+        "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
     },
     "dependencies": {
-        "@types/style-search": "^0.1.1",
+        "@types/style-search": "^0.1.3",
         "css-color-names": "^1.0.1",
-        "css-tree": "^1.0.0-alpha.39",
-        "postcss": "^8.1.1",
-        "postcss-less": "^3.1.4",
+        "css-tree": "^1.1.3",
+        "postcss": "^8.3.6",
+        "postcss-less": "^5.0.0",
         "postcss-value-parser": "^4.1.0",
-        "prettier": "~2.1.2",
         "style-search": "^0.1.0",
-        "stylelint": "^13.6.1",
-        "stylelint-rule-creator": "^4.0.8",
-        "typescript": "^4.0.3"
+        "stylelint": "^13.13.1",
+        "stylelint-rule-creator": "^4.1.1"
+    },
+    "devDependencies": {
+        "@types/css-tree": "^1.0.6",
+        "@types/jest": "^27.0.1",
+        "@types/postcss-less": "^4.0.1",
+        "@types/stylelint": "^13.13.2",
+        "jest": "^27.1.1",
+        "virmator": "^1.1.10"
+    },
+    "peerDependencies": {
+        "stylelint": "^13.13.1"
     }
 }
