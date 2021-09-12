@@ -1,5 +1,5 @@
 import * as postCss from 'postcss';
-import {ColorType, getColorTypes} from './color-types.rule';
+import {ColorType, getColorTypes} from './get-color-types';
 
 testCssCode('color: purple', [ColorType.named]);
 testCssCode('color: rgb(0, 0, 0)', [ColorType.rgb]);

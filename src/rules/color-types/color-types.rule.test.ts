@@ -7,7 +7,8 @@ import {
     testDefaultRule,
 } from 'stylelint-rule-creator';
 import {pluginPath} from '../../plugin-util';
-import {ColorType, colorTypesRule, ColorTypesRuleOptions} from './color-types.rule';
+import {colorTypesRule, ColorTypesRuleOptions} from './color-types.rule';
+import {ColorType} from './get-color-types';
 
 function getObjectTypedKeys<T extends object>(input: T): (keyof T)[] {
     return Object.keys(input) as (keyof T)[];
@@ -277,7 +278,7 @@ function getLinterOptionsBySyntax(syntax: Syntax): Partial<LinterOptions> {
         ? // "css" isn't a syntax option
           {}
         : {
-              syntax: syntax,
+              syntax,
           };
 }
 
