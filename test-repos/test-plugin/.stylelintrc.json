@@ -1,0 +1,9 @@
+{
+    "plugins": ["stylelint-plugin-color"],
+    "rules": {
+        "plugin-color/color-types": {
+            "mode": "require",
+            "types": ["rgb"]
+        }
+    }
+}

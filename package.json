@@ -31,10 +31,10 @@
     "scripts": {
         "prepublishOnly": "npm run test",
         "spellcheck": "virmator spellcheck",
-        "test": "rm -rf dist; tsc && jest",
+        "test": "virmator compile && jest",
         "test:full": "npm test && npm run spellcheck && virmator format check",
         "format": "virmator format write",
-        "debug": "rm -rf dist; tsc; echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
+        "debug": "virmator compile && echo \"To break, stick 'debugger' somewhere in the code and open the nodejs debug tools in chrome.\"; node --inspect node_modules/.bin/jest --runInBand dist/rules/color-types/color-types.test.js"
     },
     "dependencies": {
         "@types/style-search": "^0.1.3",

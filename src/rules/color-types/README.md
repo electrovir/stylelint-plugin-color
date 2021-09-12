@@ -16,7 +16,7 @@ This is a required property.
 
 ```javascript
 "plugin-color/color-types": {
-    "mode": "require"
+    "mode": "require",
     // type strings go in this array
     "types": ["rgb", "hsl", etc.]
 }

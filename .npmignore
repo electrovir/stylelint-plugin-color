@@ -15,5 +15,6 @@ jest.config.json
 prettierignore
 scripts
 src
+test-repos
 tsconfig-base.json
 tsconfig.json
