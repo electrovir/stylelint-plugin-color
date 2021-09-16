@@ -7,6 +7,7 @@ import {
     testDefaultRule,
 } from 'stylelint-rule-creator';
 import {pluginPath} from '../../plugin-util';
+import {Syntax} from '../../syntax';
 import {colorTypesRule, ColorTypesRuleOptions} from './color-types.rule';
 import {ColorType} from './get-color-types';
 
@@ -22,12 +23,6 @@ function getEnumTypedKeys<T extends object>(input: T): (keyof T)[] {
 function getEnumTypedValues<T extends object>(input: T): T[keyof T][] {
     const keys = getEnumTypedKeys(input);
     return keys.map((key) => input[key]);
-}
-
-enum Syntax {
-    less = 'less',
-    scss = 'scss',
-    css = 'css',
 }
 
 type AcceptSyntaxTest = TestCase & {
@@ -170,10 +165,16 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             colorTypes: [ColorType.hsva],
         },
         {
-            description: 'assigning argb colors to less variables',
+            description: 'assigning argb colors to less variables with hex input',
             code: '@myVar: argb(#000000);',
             failureCode: '@myVar: argb(#000000)',
-            colorTypes: [ColorType.argb],
+            colorTypes: [ColorType.argb, ColorType.hex],
+        },
+        {
+            description: 'assigning argb colors to less variables with rgb input',
+            code: '@myVar: argb(rgb(4, 5, 6));',
+            failureCode: '@myVar: argb(rgb(4, 5, 6))',
+            colorTypes: [ColorType.argb, ColorType.rgb],
         },
     ],
     [Syntax.scss]: [
@@ -236,10 +237,16 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             colorTypes: [ColorType.hsva],
         },
         {
-            description: 'assigning argb colors to scss variables',
+            description: 'assigning argb colors to scss variables with hex input',
             code: '$myVar: argb(#000000);',
             failureCode: '$myVar: argb(#000000)',
-            colorTypes: [ColorType.argb],
+            colorTypes: [ColorType.argb, ColorType.hex],
+        },
+        {
+            description: 'assigning argb colors to scss variables with rgb input',
+            code: '$myVar: argb(rgb(4, 5, 6));',
+            failureCode: '$myVar: argb(rgb(4, 5, 6))',
+            colorTypes: [ColorType.argb, ColorType.rgb],
         },
     ],
     [Syntax.css]: [
@@ -314,10 +321,16 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             colorTypes: [ColorType.hsva],
         },
         {
-            description: 'argb colors',
+            description: 'argb colors with hex input',
             code: 'div { color: argb(#000000); }',
             failureCode: 'color: argb(#000000)',
-            colorTypes: [ColorType.argb],
+            colorTypes: [ColorType.argb, ColorType.hex],
+        },
+        {
+            description: 'argb colors with rgb input',
+            code: 'div { color: argb(rgb(4, 5, 6)); }',
+            failureCode: 'color: argb(rgb(4, 5, 6))',
+            colorTypes: [ColorType.argb, ColorType.rgb],
         },
     ],
 };

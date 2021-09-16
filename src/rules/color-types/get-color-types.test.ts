@@ -1,31 +1,27 @@
 import * as postCss from 'postcss';
 import * as postLess from 'postcss-less';
+import {Syntax} from '../../syntax';
 import {ColorType, getColorTypes} from './get-color-types';
 
-enum Lang {
-    css = 'css',
-    less = 'less',
-}
-
-testCode('color: purple', [ColorType.named], Lang.css);
-testCode('color: rgb(0, 0, 0)', [ColorType.rgb], Lang.css);
-testCode('color: #000000', [ColorType.hex], Lang.css);
+testCode('color: purple', [ColorType.named], Syntax.css);
+testCode('color: rgb(0, 0, 0)', [ColorType.rgb], Syntax.css);
+testCode('color: #000000', [ColorType.hex], Syntax.css);
 testCode(
     '.styles {color: rgb(0, 0, 0); background-color: hsva(0, 0, 0, 0);}',
     [ColorType.rgb, ColorType.hsva],
-    Lang.css,
+    Syntax.css,
 );
 testCode(
     '.styles {color: rgb(0, 0, 0); background-color: #000000;}',
     [ColorType.rgb, ColorType.hex],
-    Lang.css,
+    Syntax.css,
 );
 testCode(
     '.styles {color: blue; background-color: #000000;}',
     [ColorType.named, ColorType.hex],
-    Lang.css,
+    Syntax.css,
 );
-testCode('.styles {color: invalid-color; background-color: #000000;}', [ColorType.hex], Lang.css);
+testCode('.styles {color: invalid-color; background-color: #000000;}', [ColorType.hex], Syntax.css);
 testCode(
     `
     .myMixin(@colorVal) {
@@ -36,10 +32,37 @@ testCode(
         .myMixin(#123);
     }`,
     [ColorType.hex],
-    Lang.less,
+    Syntax.less,
+);
+testCode(
+    `
+    div {
+        color: darken(#123, 50%);
+    }`,
+    [ColorType.hex],
+    Syntax.less,
+);
+// no false positives
+testCode(
+    `
+    :host(#cab) {
+        text-align: center;
+    }`,
+    [],
+    Syntax.css,
+);
+testCode(
+    `
+    :host {
+        #cab {
+            text-align: center;
+        }
+    }`,
+    [],
+    Syntax.less,
 );
 
-function testCode(code: string, types: ColorType[], language: Lang) {
+function testCode(code: string, types: ColorType[], language: Syntax) {
     test(code, () => {
         const parsedTypes = new Set<ColorType>();
 
@@ -57,11 +80,14 @@ function testCode(code: string, types: ColorType[], language: Lang) {
     });
 }
 
-function getParser(language: Lang) {
+function getParser(language: Syntax) {
     switch (language) {
-        case Lang.less:
+        case Syntax.less:
             return postLess;
-        case Lang.css:
+        case Syntax.css:
             return postCss;
+        case Syntax.scss:
+            // not sure what this should be actually
+            return postLess;
     }
 }

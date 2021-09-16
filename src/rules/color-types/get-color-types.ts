@@ -38,6 +38,17 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
     const nodeString = node.toString();
     const nodeValue = (node as Declaration).value || (node as AtRule).params;
     const colorTypes = new Set<ColorType>();
+    let hexFound = false;
+
+    function extractHex(input: string) {
+        const hexMatch = input.match(/^#[0-9A-Za-z]+/);
+
+        if (hexMatch) {
+            colorTypes.add(ColorType.hex);
+            hexFound = true;
+            return;
+        }
+    }
 
     parseValue(nodeValue).walk((node) => {
         // check for color functions
@@ -52,11 +63,11 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
         if (node.type === 'word') {
             if (colorNames.includes(node.value)) {
                 colorTypes.add(ColorType.named);
+            } else if (node.value.startsWith('#')) {
+                extractHex(node.value);
             }
         }
     });
-
-    let hexFound = false;
 
     // check for color hex values
     styleSearch({source: nodeString, target: '#'}, (match) => {
@@ -74,13 +85,7 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
             return;
         }
 
-        const hexMatch = /^#[0-9A-Za-z]+/.exec(nodeString.substr(match.startIndex));
-
-        if (hexMatch) {
-            colorTypes.add(ColorType.hex);
-            hexFound = true;
-            return;
-        }
+        extractHex(nodeString.substr(match.startIndex));
     });
 
     return colorTypes;
