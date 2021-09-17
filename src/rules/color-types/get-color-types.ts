@@ -1,4 +1,4 @@
-import * as colorNamesObject from 'css-color-names';
+import colorNamesObject from 'css-color-names';
 import {AtRule, Declaration} from 'postcss';
 import {MixinAtRule as LessMixinAtRule, VariableAtRule as LessVarAtRule} from 'postcss-less';
 import parseValue, {Node as ValueNode} from 'postcss-value-parser';
@@ -34,7 +34,7 @@ function getColorFunctionName(node: ValueNode): ColorType | undefined {
     return colorFunctions[colorFunctions.indexOf(node.value as ColorType)];
 }
 
-export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
+export function getColorTypes(node: ColorTypesNode, debug = false): Set<ColorType> {
     const nodeString = node.toString();
     const nodeValue = (node as Declaration).value || (node as AtRule).params;
     const colorTypes = new Set<ColorType>();
@@ -44,6 +44,9 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
         const hexMatch = input.match(/^#[0-9A-Za-z]+/);
 
         if (hexMatch) {
+            if (debug) {
+                console.log(`adding "${ColorType.hex}" from extractHex for "${input}"`);
+            }
             colorTypes.add(ColorType.hex);
             hexFound = true;
             return;
@@ -55,6 +58,11 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
         if (node.type === 'function') {
             const colorFunctionName = getColorFunctionName(node);
             if (colorFunctionName) {
+                if (debug) {
+                    console.log(
+                        `adding "${colorFunctionName}" from function check for "${node.value}"`,
+                    );
+                }
                 colorTypes.add(colorFunctionName);
             }
         }
@@ -62,6 +70,9 @@ export function getColorTypes(node: ColorTypesNode): Set<ColorType> {
         // check for color keywords
         if (node.type === 'word') {
             if (colorNames.includes(node.value)) {
+                if (debug) {
+                    console.log(`adding "${ColorType.named}" from word check for "${node.value}"`);
+                }
                 colorTypes.add(ColorType.named);
             } else if (node.value.startsWith('#')) {
                 extractHex(node.value);

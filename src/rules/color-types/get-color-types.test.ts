@@ -61,6 +61,29 @@ testCode(
     [],
     Syntax.less,
 );
+testCode(
+    `
+    :host {
+        #cab {
+            cursor: default;
+        }
+    }`,
+    [],
+    Syntax.less,
+);
+testCode(
+    `
+    $thing: blue;
+
+    :host {
+        #cab {
+            cursor: default;
+            color: $thing;
+        }
+    }`,
+    [ColorType.named],
+    Syntax.scss,
+);
 
 function testCode(code: string, types: ColorType[], language: Syntax) {
     test(code, () => {
