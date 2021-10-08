@@ -1,6 +1,6 @@
 {
     "name": "stylelint-plugin-color",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "description": "Stylelint plugin for managing colors. Includes Less and Sass support.",
     "keywords": [
         "color",
@@ -57,8 +57,5 @@
         "stylelint": "^13.13.1",
         "stylelint-jest-rule-tester": "^2.1.5",
         "virmator": "^1.2.0"
-    },
-    "peerDependencies": {
-        "stylelint": "^13.13.1"
     }
 }
