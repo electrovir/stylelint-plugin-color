@@ -1,4 +1,4 @@
 {
     "import": ".cspell-base.json",
-    "words": ["atrule"]
+    "words": ["atrule", "fsevents"]
 }
