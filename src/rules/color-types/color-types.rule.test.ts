@@ -1,11 +1,11 @@
 import {LinterOptions} from 'stylelint';
+import {DefaultOptionMode} from 'stylelint-rule-creator';
 import {
-    DefaultOptionMode,
     DefaultRuleTest,
     RejectTestCase,
     TestCase,
     testDefaultRule,
-} from 'stylelint-rule-creator';
+} from 'stylelint-rule-creator/dist/testing';
 import {pluginPath} from '../../plugin-util';
 import {Syntax} from '../../syntax';
 import {colorTypesRule, ColorTypesRuleOptions} from './color-types.rule';
