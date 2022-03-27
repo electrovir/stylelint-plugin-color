@@ -1,5 +1,5 @@
 export enum Syntax {
-    less = 'less',
-    scss = 'scss',
+    less = 'postcss-less',
+    scss = 'postcss-scss',
     css = 'css',
 }

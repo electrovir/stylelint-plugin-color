@@ -8,17 +8,26 @@ testCode('color: rgb(0, 0, 0)', [ColorType.rgb], Syntax.css);
 testCode('color: #000000', [ColorType.hex], Syntax.css);
 testCode(
     '.styles {color: rgb(0, 0, 0); background-color: hsva(0, 0, 0, 0);}',
-    [ColorType.rgb, ColorType.hsva],
+    [
+        ColorType.rgb,
+        ColorType.hsva,
+    ],
     Syntax.css,
 );
 testCode(
     '.styles {color: rgb(0, 0, 0); background-color: #000000;}',
-    [ColorType.rgb, ColorType.hex],
+    [
+        ColorType.rgb,
+        ColorType.hex,
+    ],
     Syntax.css,
 );
 testCode(
     '.styles {color: blue; background-color: #000000;}',
-    [ColorType.named, ColorType.hex],
+    [
+        ColorType.named,
+        ColorType.hex,
+    ],
     Syntax.css,
 );
 testCode('.styles {color: invalid-color; background-color: #000000;}', [ColorType.hex], Syntax.css);

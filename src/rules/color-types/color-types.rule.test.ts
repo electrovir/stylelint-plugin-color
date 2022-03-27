@@ -126,7 +126,10 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
                 }`,
             // less parser turns the mixin call, .myMixin(), into an at rule, @myMixin().
             failureCode: '@myMixin(blue, rgb(255, 0, 200))',
-            colorTypes: [ColorType.named, ColorType.rgb],
+            colorTypes: [
+                ColorType.named,
+                ColorType.rgb,
+            ],
         },
         {
             description: 'assigning rgb colors to less variables',
@@ -168,13 +171,19 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             description: 'assigning argb colors to less variables with hex input',
             code: '@myVar: argb(#000000);',
             failureCode: '@myVar: argb(#000000)',
-            colorTypes: [ColorType.argb, ColorType.hex],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.hex,
+            ],
         },
         {
             description: 'assigning argb colors to less variables with rgb input',
             code: '@myVar: argb(rgb(4, 5, 6));',
             failureCode: '@myVar: argb(rgb(4, 5, 6))',
-            colorTypes: [ColorType.argb, ColorType.rgb],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.rgb,
+            ],
         },
     ],
     [Syntax.scss]: [
@@ -240,13 +249,19 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             description: 'assigning argb colors to scss variables with hex input',
             code: '$myVar: argb(#000000);',
             failureCode: '$myVar: argb(#000000)',
-            colorTypes: [ColorType.argb, ColorType.hex],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.hex,
+            ],
         },
         {
             description: 'assigning argb colors to scss variables with rgb input',
             code: '$myVar: argb(rgb(4, 5, 6));',
             failureCode: '$myVar: argb(rgb(4, 5, 6))',
-            colorTypes: [ColorType.argb, ColorType.rgb],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.rgb,
+            ],
         },
     ],
     [Syntax.css]: [
@@ -324,13 +339,19 @@ const testsBySyntax: {[key in Syntax]: SyntaxTest[]} = {
             description: 'argb colors with hex input',
             code: 'div { color: argb(#000000); }',
             failureCode: 'color: argb(#000000)',
-            colorTypes: [ColorType.argb, ColorType.hex],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.hex,
+            ],
         },
         {
             description: 'argb colors with rgb input',
             code: 'div { color: argb(rgb(4, 5, 6)); }',
             failureCode: 'color: argb(rgb(4, 5, 6))',
-            colorTypes: [ColorType.argb, ColorType.rgb],
+            colorTypes: [
+                ColorType.argb,
+                ColorType.rgb,
+            ],
         },
     ],
 };
@@ -369,7 +390,7 @@ function getLinterOptionsBySyntax(syntax: Syntax): Partial<LinterOptions> {
         ? // "css" isn't a syntax option
           {}
         : {
-              syntax,
+              customSyntax: syntax,
           };
 }
 
@@ -503,7 +524,11 @@ testDefaultRule({
         {
             ruleOptions: {
                 mode: DefaultOptionMode.REQUIRE,
-                types: [ColorType.hex, ColorType.named, ColorType.rgb],
+                types: [
+                    ColorType.hex,
+                    ColorType.named,
+                    ColorType.rgb,
+                ],
             },
             description: 'multiple types work',
             accept: [
