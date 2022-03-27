@@ -1,6 +1,6 @@
-import {dirname, join} from 'path';
-import {runShellCommand} from 'augment-vir/dist/node-only';
 import {removeColor} from 'augment-vir';
+import {runShellCommand} from 'augment-vir/dist/node-only';
+import {dirname, join} from 'path';
 
 const repoRootDir = dirname(__dirname);
 const testReposDir = join(repoRootDir, 'test-repos');
@@ -11,12 +11,12 @@ const testRepos = {
 
 describe('test repos', () => {
     const stylelintCommand = `npx stylelint *.css`;
-    
+
     it('should fail', async () => {
         const commandResult = await runShellCommand(stylelintCommand, {
-            cwd: testRepos.shouldFail
+            cwd: testRepos.shouldFail,
         });
-        
+
         expect(commandResult.error).toBeDefined();
         expect(commandResult.exitCode).not.toBe(0);
         expect(commandResult.stderr).toBe('');
@@ -25,9 +25,9 @@ describe('test repos', () => {
     });
     it('should pass', async () => {
         const commandResult = await runShellCommand(stylelintCommand, {
-            cwd: testRepos.shouldPass
+            cwd: testRepos.shouldPass,
         });
-        
+
         expect(commandResult.error).toBeUndefined();
         expect(commandResult.exitCode).toBe(0);
         expect(commandResult.stderr).toBe('');
