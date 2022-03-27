@@ -1,8 +1,0 @@
-{
-    "name": "test-plugin",
-    "private": true,
-    "dependencies": {
-        "stylelint": "^13.13.1",
-        "stylelint-plugin-color": "file:../.."
-    }
-}

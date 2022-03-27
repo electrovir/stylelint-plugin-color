@@ -1,0 +1,9 @@
+{
+    "plugins": ["../../dist"],
+    "rules": {
+        "plugin-color/color-types": {
+            "mode": "require",
+            "types": ["rgb"]
+        }
+    }
+}
